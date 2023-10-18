@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "concurrently": "^8.2.1",
     "cross-env": "^7.0.3",
+    "electromon": "^1.0.10",
     "electron": "^27.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

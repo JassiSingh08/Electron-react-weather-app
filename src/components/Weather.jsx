@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 
 const Weather = () => {
-  const [country, setCountry] = useState("New Delhi"); // Initialize with New Delhi as an example
+  const [country, setCountry] = useState(""); 
   const [weatherData, setWeatherData] = useState(null);
-  const [buttonPressed, setButtonPressed] = useState(false); // Add a state variable
+  const [buttonPressed, setButtonPressed] = useState(false); 
   const [error, setError] = useState("");
 
   const handleWeather = async () => {
@@ -29,6 +29,7 @@ const Weather = () => {
     if (buttonPressed) {
       handleWeather();
     }
+    // eslint-disable-next-line
   }, [buttonPressed]);
 
   const handleSubmit = () => {
@@ -42,7 +43,7 @@ const Weather = () => {
   };
 
   return (
-    <div className="p-6 h-screen italic flex flex-col items-center justify-center">
+    <div className="p-6 italic flex flex-col items-center justify-center">
       <h2 className="text-3xl font-semibold">Today's Weather</h2>
       <div className="flex items-center space-x-2 mt-4">
         <input
