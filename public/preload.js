@@ -4,10 +4,12 @@ console.log("preload.js");
 
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("electron", {
-  OpenWindow: () => {
-    console.log("message");
-    ipcRenderer.send("messager", message);
+contextBridge.exposeInMainWorld("myApp", {
+  sayHello: (arg) => {
+    ipcRenderer.invoke("message-say-hello", arg).then((result) => {
+      console.log(result, "2");
+    });
   },
 });
+
 console.log("Success");

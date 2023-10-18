@@ -1,5 +1,13 @@
-const { app, BrowserWindow, Menu, dialog, MenuItem, ipcMain } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  dialog,
+  MenuItem,
+  ipcMain,
+} = require("electron");
 const path = require("path");
+const { eventNames } = require("process");
 let win;
 
 const createWindow = () => {
@@ -13,7 +21,7 @@ const createWindow = () => {
     },
   });
   win.loadURL("http://localhost:3000");
-//   win.webContents.openDevTools();
+    win.webContents.openDevTools();
 };
 
 //about child modal
@@ -51,6 +59,11 @@ const createChildWindow = () => {
     height: 400,
     parent: win,
     modal: true,
+    // webPreferences: {
+    //   nodeIntegration: true,
+    //   contextIsolation: true,
+    //   preload: path.join(__dirname, "preload.js"),
+    // },
   });
   childWindow.loadURL("http://localhost:3000");
   childWindow.once("ready-to-show", () => {
@@ -129,12 +142,18 @@ app.whenReady().then(() => {
 });
 
 ipcMain.handle("loadContent", (e) => {
-    return loadContent();
-  });
+  return loadContent();
+});
 
 //mac
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+ipcMain.handle("message-say-hello", async (event, args) => {
+  showAboutDialog()
+  // console.log("I am from main process", args, "1")
+  return { message: "MAIN HERE : I am invoking a browser window on click of a button from renderer" };
 });
