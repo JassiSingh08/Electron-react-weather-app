@@ -5,9 +5,10 @@ const {
   dialog,
   MenuItem,
   ipcMain,
+  Tray,
 } = require("electron");
 const path = require("path");
-const { eventNames } = require("process");
+
 let win;
 
 const createWindow = () => {
@@ -21,7 +22,7 @@ const createWindow = () => {
     },
   });
   win.loadURL("http://localhost:3000");
-    win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 };
 
 //about child modal
@@ -57,11 +58,6 @@ const createChildWindow = () => {
     height: 400,
     parent: win,
     modal: true,
-    // webPreferences: {
-    //   nodeIntegration: true,
-    //   contextIsolation: true,
-    //   preload: path.join(__dirname, "preload.js"),
-    // },
   });
   childWindow.loadURL("http://localhost:3000");
   childWindow.once("ready-to-show", () => {
@@ -101,6 +97,15 @@ app.whenReady().then(() => {
       click: () => {
         showAboutDialog();
       },
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { role: 'togglefullscreen' }
+      ]
     },
   ];
 
@@ -143,17 +148,33 @@ ipcMain.handle("loadContent", (e) => {
   return loadContent();
 });
 
-//mac
+// let tray = null
+// app.whenReady().then(() => {
+//   tray = new Tray('trayicon.jpg')
+//   const TraycontextMenu = Menu.buildFromTemplate([
+//     { label: 'Item1', type: 'radio' },
+//     { label: 'Item2', type: 'radio' },
+//     { label: 'Item3', type: 'radio', checked: true },
+//     { label: 'Item4', type: 'radio' }
+//   ])
+//   tray.setToolTip('E-R-app')
+//   tray.setContextMenu(TraycontextMenu)
+// })
+
 app.on("window-all-closed", () => {
+  //mac
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-ipcMain.handle("message-say-hello", async (event, args) => {
+ipcMain.handle("open-Window", async (event, args) => {
   const { text, author } = args.randomQuote;
 
-  showAboutDialog(text,author)
-  console.log("I am from main process", args, "1")
-  return { message: "MAIN HERE : I am invoking a browser window on click of a button from renderer" };
+  showAboutDialog(text, author);
+  console.log("I am from main process", args, "1");
+  return {
+    message:
+      "MAIN HERE : I am invoking a browser window on click of a button from renderer",
+  };
 });

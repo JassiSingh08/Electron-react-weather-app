@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const Quotes = () => {
 
   async function clicked(args) {
-    const result = await window.myApp.sayHello(args);
+    const result = await window.myApp.openWindow(args);
     console.log(result, "3");
   }
 
@@ -36,9 +36,9 @@ const Quotes = () => {
       if (randomQuote) {
         randomQuote.author = removeTypeFit(randomQuote.author);
         setQuotes([randomQuote]);
+        
         clicked({randomQuote});
         
-
         setError(null);
       } else {
         setQuotes([]);
