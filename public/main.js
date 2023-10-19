@@ -41,13 +41,11 @@ const AboutChild = () => {
 };
 
 //about dialogue
-const showAboutDialog = () => {
+const showAboutDialog = (text, author) => {
   dialog.showMessageBox({
     type: "info",
-    title: "About Us",
-    message: "Welcome to our company.",
-    detail:
-      " We are dedicated to providing high-quality products and services to our customers. Our mission is to make the world a better place through innovation and excellence. If you have any questions or would like to get in touch with us, please feel free to contact us at:\n\nEmail: info@yourcompany.com\nPhone: +1 (123) 456-7890",
+    title: `By ${author}`,
+    message: text,
     buttons: ["OK"],
   });
 };
@@ -153,7 +151,9 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.handle("message-say-hello", async (event, args) => {
-  showAboutDialog()
-  // console.log("I am from main process", args, "1")
+  const { text, author } = args.randomQuote;
+
+  showAboutDialog(text,author)
+  console.log("I am from main process", args, "1")
   return { message: "MAIN HERE : I am invoking a browser window on click of a button from renderer" };
 });

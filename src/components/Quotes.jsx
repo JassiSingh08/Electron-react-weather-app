@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 
 const Quotes = () => {
+
+  async function clicked(args) {
+    const result = await window.myApp.sayHello(args);
+    console.log(result, "3");
+  }
+
   const [quotes, setQuotes] = useState([]);
   const [error, setError] = useState(null);
 
@@ -26,10 +32,13 @@ const Quotes = () => {
 
       const data = await res.json();
       const randomQuote = getRandomQuote(data);
-
+      
       if (randomQuote) {
         randomQuote.author = removeTypeFit(randomQuote.author);
         setQuotes([randomQuote]);
+        clicked({randomQuote});
+        
+
         setError(null);
       } else {
         setQuotes([]);
@@ -64,7 +73,6 @@ const Quotes = () => {
         </div>
       )}
       {error && <div className="mt-4 text-red-500">{error}</div>}
-
     </div>
   );
 };
