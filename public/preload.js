@@ -10,4 +10,13 @@ contextBridge.exposeInMainWorld("myApp", {
   },
 });
 
+/* contextBridge.exposeInMainWorld("Ubridge", {
+  Updatebridge: (arg) => {
+    ipcRenderer.invoke("updateMessage", arg).then((result) => {
+      console.log(result, "PRELOAD update CONSOLE");
+    });
+  },
+});
+ */
+
 console.log("Success");

@@ -3,11 +3,15 @@
   "description": "This is a sample electron-react app tht shows weather and random qoutes",
   "version": "0.1.0",
   "author": "Jass",
-  "private": true,
   "productName": "Electron-React-App",
   "main": "public/main.js",
   "homepage": "./",
   "extends": null,
+  "repository": "https://github.com/JassiSingh08/Electron-react-weather-app",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
   "build": {
     "appId": "com.jass.electron-react-app",
     "productName": "react-electron",
@@ -15,7 +19,6 @@
       "build/**/*",
       "node_modules/**/*"
     ],
-    "asar": true,
     "directories": {
       "buildResources": "assets"
     },
@@ -36,6 +39,7 @@
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "electromon": "^1.0.10",
+    "electron-updater": "^6.1.4",
     "express": "^4.18.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -52,7 +56,8 @@
     "elect": "electron .",
     "start": "concurrently \"cross-env BROWSER=none npm run react-start\" \"npm run elect\"",
     "pack": "electron-builder --dir",
-    "package": "electron-builder build --win -c.extraMetadata.main=build/main.js --publish never"
+    "package": "electron-builder build --win -c.extraMetadata.main=build/main.js --publish never",
+    "build-er": "npm run react-build && npm run package"
   },
   "eslintConfig": {
     "extends": [

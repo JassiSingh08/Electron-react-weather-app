@@ -6,12 +6,17 @@ const {
   MenuItem,
   ipcMain,
   Tray,
-  globalShortcut
+  globalShortcut,
 } = require("electron");
 const path = require("path");
 const { Notification } = require("electron");
 
 const createExpressServer = require("./exp");
+const { AppUpdater, autoUpdater } = require("electron-updater");
+
+//flags for update
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
 
 let win;
 let tray = null;
@@ -28,9 +33,10 @@ const createWindow = () => {
     },
   });
   win.loadURL("http://localhost:5000");
+  // win.loadURL("http://localhost:3000");
+  // win.webContents.openDevTools();
   // win.loadFile(path.join(__dirname, "../build/index.html"));
   // win.loadURL(`file://${path.join(__dirname, '../build/index.html')}`)
-  // win.webContents.openDevTools();
 
   createExpressServer(() => {
     console.log("Express server is running.");
@@ -50,7 +56,6 @@ const checkForUpdates = () => {
       const currentVersion = "1.1.0";
 
       if (latestVersion > currentVersion) {
-        Updates = true;
         showinfoDialog(
           "A new version is ready to be installed.",
           "Update Available"
@@ -89,9 +94,11 @@ app.whenReady().then(() => {
 
   tray.setContextMenu(contextMenu);
 
-  globalShortcut.register('CommandOrControl+Shift+I', () => {
+  globalShortcut.register("CommandOrControl+Shift+I", () => {
     win.webContents.openDevTools();
-  });  
+  });
+
+  autoUpdater.checkForUpdates();
 });
 
 //about modal
@@ -170,18 +177,11 @@ app.whenReady().then(() => {
       ],
     },
     {
-      label: "Updates",
-      submenu: [
-        {
-          label: "Check for Updates",
-          click: () => {
-            checkForUpdates();
-            /* Loading = true;
-            Loading && showinfoDialog("Checking for Updates..", "Updates");
-            setTimeout(checkForUpdates, 5000); */
-          },
-        },
-      ],
+      label: "Version",
+      click: ()=> {
+        const appVersion = app.getVersion();
+        showinfoDialog(appVersion , "Version")
+      }
     },
   ];
 
@@ -228,10 +228,9 @@ app.on("window-all-closed", () => {
 });
 
 //unregister global shortcuts
-app.on('will-quit', () => {
+app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
-
 
 ipcMain.handle("open-Window", async (event, args) => {
   const { text, author } = args.randomQuote;
@@ -242,4 +241,37 @@ ipcMain.handle("open-Window", async (event, args) => {
     message:
       "MAIN HERE : I am invoking a browser window on click of a button from renderer",
   };
+});
+
+/* ipcMain.handle("updateMessage", async (event, args) => {
+  console.log("I am from main process calling for update", args);
+  return "I am from main process calling for update";
+}); */
+
+
+// auto updates
+
+autoUpdater.on('checking-for-update', () => {
+  console.log('Checking for updates...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  console.log('Update available:', info.version);
+  autoUpdater.downloadUpdate()
+});
+
+autoUpdater.on('update-not-available', () => {
+  console.log('No updates available');
+});
+
+autoUpdater.on('error', (err) => {
+  console.error('Update error:', err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log(`Downloaded ${progressObj.percent}%`);
+});
+
+autoUpdater.on('update-downloaded', () => {
+  console.log('Update downloaded and ready to install');
 });
