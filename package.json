@@ -1,16 +1,41 @@
 {
   "name": "react-electron",
+  "description": "This is a sample electron-react app tht shows weather and random qoutes",
   "version": "0.1.0",
+  "author": "Jass",
   "private": true,
-  "main": "./public/main.js",
+  "productName": "Electron-React-App",
+  "main": "public/main.js",
+  "homepage": "./",
+  "extends": null,
+  "build": {
+    "appId": "com.jass.electron-react-app",
+    "productName": "react-electron",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "asar": true,
+    "directories": {
+      "buildResources": "assets"
+    },
+    "target": "NSIS",
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false
+    },
+    "mac": {
+      "category": "your.app.category.type"
+    }
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "concurrently": "^8.2.1",
+    "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "electromon": "^1.0.10",
-    "electron": "^27.0.0",
     "express": "^4.18.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -25,7 +50,9 @@
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
     "elect": "electron .",
-    "start": "concurrently \"cross-env BROWSER=none npm run react-start\" \"npm run elect\""
+    "start": "concurrently \"cross-env BROWSER=none npm run react-start\" \"npm run elect\"",
+    "pack": "electron-builder --dir",
+    "package": "electron-builder build --win -c.extraMetadata.main=build/main.js --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -44,5 +71,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
   }
 }

@@ -6,43 +6,107 @@ const {
   MenuItem,
   ipcMain,
   Tray,
+  globalShortcut
 } = require("electron");
 const path = require("path");
+const { Notification } = require("electron");
+
+const createExpressServer = require("./exp");
 
 let win;
+let tray = null;
 
 const createWindow = () => {
   win = new BrowserWindow({
-    width: 800,
+    width: 900,
     height: 600,
     webPreferences: {
+      webSecurity: false,
       nodeIntegration: true,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
-  win.loadURL("http://localhost:3000");
+  win.loadURL("http://localhost:5000");
+  // win.loadFile(path.join(__dirname, "../build/index.html"));
+  // win.loadURL(`file://${path.join(__dirname, '../build/index.html')}`)
   // win.webContents.openDevTools();
+
+  createExpressServer(() => {
+    console.log("Express server is running.");
+  });
+  // checkForUpdates();
 };
 
-//about child modal
+// =======================
+// Function to check for updates
+// let Loading = null;
+const checkForUpdates = () => {
+  // Loading = false;
+  fetch("http://localhost:5000/app/version")
+    .then((response) => response.json())
+    .then((data) => {
+      const latestVersion = data.version;
+      const currentVersion = "1.1.0";
 
-const AboutChild = () => {
-  const child = new BrowserWindow({
-    width: 400,
-    height: 200,
-    parent: win,
-    modal: true,
-    show: false,
-  });
-  child.loadURL("http://localhost:3000");
-  child.once("ready-to-show", () => {
-    child.show();
+      if (latestVersion > currentVersion) {
+        Updates = true;
+        showinfoDialog(
+          "A new version is ready to be installed.",
+          "Update Available"
+        );
+        notifyUser(
+          "Update Available",
+          "A new version is ready to be installed."
+        );
+      }
+    })
+    .catch((error) => {
+      console.error("Error checking for updates:", error);
+    });
+};
+
+const notifyUser = (title, message) => {
+  new Notification({
+    title,
+    body: message,
+  }).show();
+};
+// =======================
+
+app.whenReady().then(() => {
+  const imagePath = path.join(__dirname, "trayicon.png");
+
+  tray = new Tray(imagePath);
+  tray.setToolTip("ElectronReactApp");
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "Check for Updates",
+      click: () => checkForUpdates(),
+    },
+    { label: "Quit", click: () => app.quit() },
+  ]);
+
+  tray.setContextMenu(contextMenu);
+
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    win.webContents.openDevTools();
+  });  
+});
+
+//about modal
+const showAboutDialog = () => {
+  dialog.showMessageBox({
+    type: "info",
+    title: "About Weather and Quotes Desktop App",
+    message:
+      "Welcome to the Weather and Quotes Desktop App, your source for daily inspiration and weather updates!",
+    buttons: ["OK"],
   });
 };
 
-//about dialogue
-const showAboutDialog = (text, author) => {
+//info dialogue
+const showinfoDialog = (text, author) => {
   dialog.showMessageBox({
     type: "info",
     title: `By ${author}`,
@@ -59,7 +123,7 @@ const createChildWindow = () => {
     parent: win,
     modal: true,
   });
-  childWindow.loadURL("http://localhost:3000");
+  childWindow.loadURL("https://www.google.com/");
   childWindow.once("ready-to-show", () => {
     childWindow.show();
   });
@@ -83,7 +147,6 @@ app.whenReady().then(() => {
             createChildWindow();
           },
         },
-
         {
           label: "Close",
           click: () => {
@@ -99,13 +162,26 @@ app.whenReady().then(() => {
       },
     },
     {
-      label: 'View',
+      label: "View",
       submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { role: 'togglefullscreen' }
-      ]
+        { role: "reload" },
+        { role: "forceReload" },
+        { role: "togglefullscreen" },
+      ],
+    },
+    {
+      label: "Updates",
+      submenu: [
+        {
+          label: "Check for Updates",
+          click: () => {
+            checkForUpdates();
+            /* Loading = true;
+            Loading && showinfoDialog("Checking for Updates..", "Updates");
+            setTimeout(checkForUpdates, 5000); */
+          },
+        },
+      ],
     },
   ];
 
@@ -125,11 +201,7 @@ app.whenReady().then(() => {
   ContextMenu.append(
     new MenuItem({
       label: "View",
-      submenu: [
-        { role: "reload" },
-        { role: "forceReload" },
-        { role: "toggleDevTools" },
-      ],
+      submenu: [{ role: "reload" }, { role: "forceReload" }],
     })
   );
 
@@ -148,19 +220,6 @@ ipcMain.handle("loadContent", (e) => {
   return loadContent();
 });
 
-// let tray = null
-// app.whenReady().then(() => {
-//   tray = new Tray('trayicon.jpg')
-//   const TraycontextMenu = Menu.buildFromTemplate([
-//     { label: 'Item1', type: 'radio' },
-//     { label: 'Item2', type: 'radio' },
-//     { label: 'Item3', type: 'radio', checked: true },
-//     { label: 'Item4', type: 'radio' }
-//   ])
-//   tray.setToolTip('E-R-app')
-//   tray.setContextMenu(TraycontextMenu)
-// })
-
 app.on("window-all-closed", () => {
   //mac
   if (process.platform !== "darwin") {
@@ -168,10 +227,16 @@ app.on("window-all-closed", () => {
   }
 });
 
+//unregister global shortcuts
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+});
+
+
 ipcMain.handle("open-Window", async (event, args) => {
   const { text, author } = args.randomQuote;
 
-  showAboutDialog(text, author);
+  showinfoDialog(text, author);
   console.log("I am from main process", args, "1");
   return {
     message:
